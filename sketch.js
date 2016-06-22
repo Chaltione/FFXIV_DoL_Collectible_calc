@@ -2,6 +2,7 @@ function setup() {
   // populateSkillMods();
   basepos = createVector(50, 100);
   blockPadding = 10;
+  gatherAttemptsUsed = 0;
   // dummyP = createP("Your Disciple of Land class: ");
   // dummyP.position(basepos.x, basepos.y);
   // selClass = createSelect();
@@ -17,11 +18,18 @@ function setup() {
     selMAresult.value(100);
   }
 
-  labels[0] = createP("First Skill: ");
-  labels[1] = createP("Second Skill: ");
-  labels[2] = createP("Third Skill: ");
-  labels[3] = createP("Fourth Skill: ");
-  labels[4] = createP("Fifth Skill: ");
+  dummyP = createP("Modifier 1");
+  dummyP.position(basepos.x + 250, basepos.y + 20 + blockPadding);
+  dummyP = createP("Modifier 2");
+  dummyP.position(basepos.x + 426, basepos.y + 20 + blockPadding);
+  dummyP = createP("Appraisal");
+  dummyP.position(basepos.x + 592, basepos.y + 20 + blockPadding);
+
+  labels[0] = createP("First gather attempt: ");
+  labels[1] = createP("Second gather attempt: ");
+  labels[2] = createP("Third gather attempt: ");
+  labels[3] = createP("Fourth gather attempt: ");
+  labels[4] = createP("Fifth gather attempt: ");
 
   // selClass.option("Miner");
   // selClass.option("Botanist");
@@ -78,11 +86,21 @@ function setup() {
   labelMax = createP("Maximum collectability:");
   labelAverage = createP("Average collectability:");
 
+  labelGatherRemain4 = createP("Remaining collect attempts (4 attempts initially):");
+  labelGatherRemain4.style("font-size","20px");
+  labelGatherRemain6 = createP("Remaining collect attempts (6 attempts initially):");
+  labelGatherRemain6.style("font-size","20px");
+
   resultGP = createP("0");
   resultWear = createP("0");
   resultMin = createP("0");
   resultMax = createP("0");
   resultAverage = createP("0");
+
+  resultGatherRemain4 = createP("0");
+  resultGatherRemain4.style("font-size","20px");
+  resultGatherRemain6 = createP("0");
+  resultGatherRemain6.style("font-size","20px");
 
   var spacing = blockPadding * 18;
 
@@ -92,11 +110,17 @@ function setup() {
   labelMax.position(basepos.x, basepos.y + spacing + 60);
   labelAverage.position(basepos.x, basepos.y + spacing + 80);
 
+  labelGatherRemain4.position(basepos.x, basepos.y + spacing + 120);
+  labelGatherRemain6.position(basepos.x, basepos.y + spacing + 140);
+
   resultGP.position(basepos.x + 200, basepos.y + spacing);
   resultWear.position(basepos.x + 200, basepos.y + spacing + 20);
   resultMin.position(basepos.x + 200, basepos.y + spacing + 40);
   resultMax.position(basepos.x + 200, basepos.y + spacing + 60);
   resultAverage.position(basepos.x + 200, basepos.y + spacing + 80);
+
+  resultGatherRemain4.position(basepos.x + 500, basepos.y + spacing + 120);
+  resultGatherRemain6.position(basepos.x + 500, basepos.y + spacing + 140);
 
   // selClass.changed(calculateCosts);
   selMAresult.changed(calculateCosts);
@@ -106,9 +130,9 @@ function setup() {
     selModsB[i].changed(calculateCosts);
     selSkills[i].changed(calculateCosts);
   }
-  
+
   butt = createButton("Reset");
-  butt.position(basepos.x, basepos.y + spacing + 150)
+  butt.position(basepos.x, basepos.y + spacing + 210)
   butt.mousePressed(doReset);
 
   calculateCosts();
@@ -119,6 +143,8 @@ function calculateCosts() {
   var sumMaxCollectability = 0;
   var sumAvgCollectability = 0;
   var MAval = selMAresult.value();
+
+  gatherAttemptsUsed = 0;
 
   // Reset costs
   for (var j = 0; j < 5; j++) {
@@ -134,6 +160,7 @@ function calculateCosts() {
     }
   }
 
+  // loop through all the attempt rows
   for (var i = 0; i < 5; i++) {
     // Get values
     var modA = selModsA[i].value();
@@ -168,7 +195,7 @@ function calculateCosts() {
     for (var j = 0; j < 3; j++) {
       if (skill == SkillConstants[j].name) {
         GPCost[i] += SkillConstants[j].GPCost;
-        
+
         // Do something clever when Deep Breath is used
         if (!DBprocs[i].checked()) {
           WearCost[i] += SkillConstants[j].WearCost;
@@ -187,7 +214,7 @@ function calculateCosts() {
     }
 
     // Show/Hide checkboxes
-    if (selSkills[i].value() == SkillConstants[2].name) {
+    if (skill == SkillConstants[2].name) {
       DEprocs[i].show();
     }
 
@@ -200,6 +227,16 @@ function calculateCosts() {
       // DBprocs[min(i + 3, 4)].elt.disabled = false;
     }
     // Show/Hide checkboxes //
+    
+    // Use a gather attempt
+    if (skill != NotSelected) {
+      gatherAttemptsUsed++;
+    }
+    
+    // But not when Single Minded is used
+    if ((i < 4 && modA == ModConstants[3].name) || (i < 4 && modB == ModConstants[3].name)) {
+      gatherAttemptsUsed = min(gatherAttemptsUsed--,0);
+    }
   }
 
   ClearDBprocsCheckmarks();
@@ -213,13 +250,15 @@ function calculateCosts() {
   }
 
   // Update .html()  
-  resultMin.html(round(sumMinCollectability*MAval));
-  resultMax.html(round(sumMaxCollectability*MAval));
-  resultAverage.html(round(round((sumMinCollectability + sumMaxCollectability)*50*MAval)/100));
+  resultMin.html(round(sumMinCollectability * MAval));
+  resultMax.html(round(sumMaxCollectability * MAval));
+  resultAverage.html(round(round((sumMinCollectability + sumMaxCollectability) * 50 * MAval) / 100));
 
   resultGP.html(sumGP);
   resultWear.html(sumWear);
-
+  
+  resultGatherRemain4.html(4-gatherAttemptsUsed);
+  resultGatherRemain6.html(6-gatherAttemptsUsed);
 } // calculateCosts
 
 function ClearDBprocsCheckmarks() {
@@ -242,7 +281,7 @@ function ClearDBprocsCheckmarks() {
 
 function doReset() {
   selMAresult.value(100);
-  for (var i=0;i<5;i++){
+  for (var i = 0; i < 5; i++) {
     selModsA[i].value(NotSelected);
     selModsB[i].value(NotSelected);
     selSkills[i].value(NotSelected);
@@ -256,6 +295,9 @@ function doReset() {
   resultMin.html(0);
   resultMax.html(0);
   resultAverage.html(0);
+  resultGatherRemain4.html(4);
+  resultGatherRemain6.html(6);
+  // gatherAttemptsUsed = 0;
 }
 
 function draw() {}

@@ -35,14 +35,22 @@ var labelMin;
 var labelMax;
 var labelAverage;
 
+var labelGatherRemain4;
+var labelGatherRemain6;
+
 var resultGP;
 var resultWear;
 var resultMin;
 var resultMax;
 var resultAverage;
 
+var resultGatherRemain4;
+var resultGatherRemain6;
+
 var basepos;
 var blockPadding;
 
 var GPCost = [];
 var WearCost = [];
+
+var gatherAttemptsUsed;
