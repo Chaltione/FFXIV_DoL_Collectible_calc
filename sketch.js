@@ -15,8 +15,8 @@ function setup() {
 
   for (var i = 50; i <= 150; i++) {
     selMAresult.option(i);
-    selMAresult.value(100);
   }
+  selMAresult.value(100);
 
   dummyP = createP("Modifier 1");
   dummyP.position(basepos.x + 250, basepos.y + 20 + blockPadding);
@@ -87,9 +87,9 @@ function setup() {
   labelAverage = createP("Average collectability:");
 
   labelGatherRemain4 = createP("Remaining collect attempts (4 attempts initially):");
-  labelGatherRemain4.style("font-size","20px");
+  labelGatherRemain4.style("font-size", "20px");
   labelGatherRemain6 = createP("Remaining collect attempts (6 attempts initially):");
-  labelGatherRemain6.style("font-size","20px");
+  labelGatherRemain6.style("font-size", "20px");
 
   resultGP = createP("0");
   resultWear = createP("0");
@@ -98,9 +98,9 @@ function setup() {
   resultAverage = createP("0");
 
   resultGatherRemain4 = createP("0");
-  resultGatherRemain4.style("font-size","20px");
+  resultGatherRemain4.style("font-size", "20px");
   resultGatherRemain6 = createP("0");
-  resultGatherRemain6.style("font-size","20px");
+  resultGatherRemain6.style("font-size", "20px");
 
   var spacing = blockPadding * 18;
 
@@ -227,15 +227,18 @@ function calculateCosts() {
       // DBprocs[min(i + 3, 4)].elt.disabled = false;
     }
     // Show/Hide checkboxes //
-    
+
     // Use a gather attempt
     if (skill != NotSelected) {
       gatherAttemptsUsed++;
     }
-    
+
     // But not when Single Minded is used
     if ((i < 4 && modA == ModConstants[3].name) || (i < 4 && modB == ModConstants[3].name)) {
-      gatherAttemptsUsed = min(gatherAttemptsUsed--,0);
+      println(gatherAttemptsUsed);
+      gatherAttemptsUsed--;
+      gatherAttemptsUsed = max(gatherAttemptsUsed, 0);
+      println(gatherAttemptsUsed);
     }
   }
 
@@ -256,9 +259,9 @@ function calculateCosts() {
 
   resultGP.html(sumGP);
   resultWear.html(sumWear);
-  
-  resultGatherRemain4.html(4-gatherAttemptsUsed);
-  resultGatherRemain6.html(6-gatherAttemptsUsed);
+
+  resultGatherRemain4.html(4 - gatherAttemptsUsed);
+  resultGatherRemain6.html(6 - gatherAttemptsUsed);
 } // calculateCosts
 
 function ClearDBprocsCheckmarks() {
