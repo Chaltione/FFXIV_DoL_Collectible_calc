@@ -1,3 +1,5 @@
+var DOMarray = [];
+
 var SkillConstants = [];
 var ModConstants = [];
 
@@ -20,6 +22,7 @@ var NotSelected = "None";
 var dummyP;
 var selClass;
 var selMAresult;
+var selMAslider;
 var selSkills = [];
 var selModsA = [];
 var selModsB = [];

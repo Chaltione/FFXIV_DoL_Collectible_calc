@@ -11,12 +11,19 @@ function setup() {
   dummyP = createP("Methodical Appraisal result: ");
   dummyP.position(basepos.x, basepos.y);
   selMAresult = createSelect();
+  DOMarray.push(selMAresult);
   selMAresult.position(basepos.x + 200, basepos.y + 15);
 
-  for (var i = 50; i <= 150; i++) {
+  for (var i = 80; i <= 115; i++) {
     selMAresult.option(i);
   }
   selMAresult.value(100);
+  
+  selMAslider = createSlider(80,115,100,1);
+  selMAslider.position(basepos.x + 250,basepos.y+15);
+  selMAslider.style('width', '300px');
+  selMAslider.input(updateSelMAresult);
+  selMAslider.changed(calculateCosts);
 
   dummyP = createP("Modifier 1");
   dummyP.position(basepos.x + 250, basepos.y + 20 + blockPadding);
@@ -39,6 +46,9 @@ function setup() {
     selModsA[i] = createSelect();
     selModsB[i] = createSelect();
     selSkills[i] = createSelect();
+    DOMarray.push(selModsA[i]);
+    DOMarray.push(selModsB[i]);
+    DOMarray.push(selSkills[i]);
     selSkills[i].option(NotSelected);
     selSkills[i].option(SkillConstants[0].name);
     selSkills[i].option(SkillConstants[1].name);
@@ -67,6 +77,7 @@ function setup() {
   dummyP.position(basepos.x + 725, basepos.y + 20 + blockPadding);
   for (var i = 0; i < 5; i++) {
     DEprocs[i] = createCheckbox();
+    DOMarray.push(DEprocs[i]);
     DEprocs[i].position(basepos.x + 775, basepos.y + 55 + i * 20 + blockPadding);
     DEprocs[i].changed(calculateCosts);
   }
@@ -75,6 +86,7 @@ function setup() {
   dummyP.position(basepos.x + 875, basepos.y + 20 + blockPadding);
   for (var i = 0; i < 5; i++) {
     DBprocs[i] = createCheckbox();
+    DOMarray.push(DBprocs[i]);
     DBprocs[i].position(basepos.x + 925, basepos.y + 55 + i * 20 + blockPadding);
     DBprocs[i].changed(calculateCosts);
   }
@@ -135,8 +147,116 @@ function setup() {
   butt.position(basepos.x, basepos.y + spacing + 210)
   butt.mousePressed(doReset);
 
+  giveDOMnames();
+  getParams();
   calculateCosts();
 } // setup
+
+function updateSelMAresult() {
+  selMAresult.value(selMAslider.value());
+}
+
+function giveDOMnames() {
+  DOMarray[0].name = "mr";
+  DOMarray[1].name = "m1a";
+  DOMarray[2].name = "m1b";
+  DOMarray[3].name = "s1";
+  DOMarray[4].name = "m2a";
+  DOMarray[5].name = "m2b";
+  DOMarray[6].name = "s2";
+  DOMarray[7].name = "m3a";
+  DOMarray[8].name = "m3b";
+  DOMarray[9].name = "s3";
+  DOMarray[10].name = "m4a";
+  DOMarray[11].name = "m4b";
+  DOMarray[12].name = "s4";
+  DOMarray[13].name = "m5a";
+  DOMarray[14].name = "m5b";
+  DOMarray[15].name = "s5";
+  DOMarray[16].name = "de1";
+  DOMarray[17].name = "de2";
+  DOMarray[18].name = "de3";
+  DOMarray[19].name = "de4";
+  DOMarray[20].name = "de5";
+  DOMarray[21].name = "db1";
+  DOMarray[22].name = "db2";
+  DOMarray[23].name = "db3";
+  DOMarray[24].name = "db4";
+  DOMarray[25].name = "db5";
+}
+
+function getParams() {
+  var paramList = window.location.search.split('?')[1];
+  if (paramList) {
+    var paramArray = paramList.split('&');
+    // var i = 0
+    for (var p in paramArray) {
+      var tempSplit = paramArray[p].split('=');
+      for (var j = 0; j < DOMarray.length; j++) {
+        if (tempSplit[0] == DOMarray[j].name) {
+          if (tempSplit[1] == 'n') {
+            DOMarray[j].value(NotSelected);
+          } else if (tempSplit[1] == -999) {
+            DOMarray[j].checked(true);
+          } else if (tempSplit[1] > 0) {
+            DOMarray[j].value(tempSplit[1]);
+          } else if (tempSplit[1] <= -100) {
+            tempSplit[1] = 100 + Number(tempSplit[1]);
+            DOMarray[j].value(SkillConstants[abs(tempSplit[1])].name);
+          } else if (tempSplit[1] <= 0) {
+            DOMarray[j].value(ModConstants[abs(tempSplit[1])].name);
+          }
+        }
+      }
+    }
+  }
+}
+
+function setParams() {
+  var paramstring = "";
+  for (var d in DOMarray) {
+    if (DOMarray[d].name[1] == 'r') {
+      paramstring += "?" + DOMarray[d].name + "=" + DOMarray[d].value();
+    } else if (DOMarray[d].name[0] == 'm' && DOMarray[d].value() != NotSelected) {
+      var tempValue = "";
+
+      if (DOMarray[d].value() == ModConstants[0].name) {
+        tempValue = 0;
+      } else if (DOMarray[d].value() == ModConstants[1].name) {
+        tempValue = 1;
+      } else if (DOMarray[d].value() == ModConstants[2].name) {
+        tempValue = 2;
+      } else if (DOMarray[d].value() == ModConstants[3].name) {
+        tempValue = 3;
+      }
+      paramstring += "&" + DOMarray[d].name + "=" + -tempValue;
+    } else if (DOMarray[d].name[0] == 's' && DOMarray[d].value() != NotSelected) {
+      var tempValue = "";
+
+      if (DOMarray[d].value() == SkillConstants[0].name) {
+        tempValue = 100;
+      } else if (DOMarray[d].value() == SkillConstants[1].name) {
+        tempValue = 101;
+      } else if (DOMarray[d].value() == SkillConstants[2].name) {
+        tempValue = 102;
+      }
+      paramstring += "&" + DOMarray[d].name + "=" + -tempValue;
+    } else if (DOMarray[d].name[0] == 'd' && DOMarray[d].checked()) {
+      paramstring += "&" + DOMarray[d].name + "=-999";
+    } else {
+      // paramstring += "&" + DOMarray[d].name + "=n";
+    }
+  }
+  println(paramstring)
+  
+  if (history.pushState) {
+    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + paramstring;
+    window.history.pushState({
+      path: newurl
+    }, '', newurl);
+  }
+  
+}
 
 function calculateCosts() {
   var sumMinCollectability = 0;
@@ -262,6 +382,8 @@ function calculateCosts() {
 
   resultGatherRemain4.html(4 - gatherAttemptsUsed);
   resultGatherRemain6.html(6 - gatherAttemptsUsed);
+
+  setParams();
 } // calculateCosts
 
 function ClearDBprocsCheckmarks() {
@@ -284,6 +406,7 @@ function ClearDBprocsCheckmarks() {
 
 function doReset() {
   selMAresult.value(100);
+  selMAslider.value(100);
   for (var i = 0; i < 5; i++) {
     selModsA[i].value(NotSelected);
     selModsB[i].value(NotSelected);
@@ -301,6 +424,8 @@ function doReset() {
   resultGatherRemain4.html(4);
   resultGatherRemain6.html(6);
   // gatherAttemptsUsed = 0;
+  
+  setParams();
 }
 
 function draw() {}
